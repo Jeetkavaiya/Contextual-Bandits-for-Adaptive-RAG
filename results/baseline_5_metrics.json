@@ -1,0 +1,26 @@
+{
+  "all": {
+    "n": 5,
+    "avg_correctness_0_2": 1.8,
+    "avg_faithfulness_0_1": 1.0,
+    "avg_total_time_s": 214.55296177999952,
+    "avg_total_tokens": 1175.6,
+    "avg_evidence_recall_at_k_0_1": 0.3333333333333333
+  },
+  "in_domain": {
+    "n": 3,
+    "avg_correctness_0_2": 1.6666666666666667,
+    "avg_faithfulness_0_1": 1.0,
+    "avg_total_time_s": 203.9594495333331,
+    "avg_total_tokens": 1099.3333333333333,
+    "avg_evidence_recall_at_k_0_1": 0.3333333333333333
+  },
+  "out_of_domain": {
+    "n": 2,
+    "avg_correctness_0_2": 2.0,
+    "avg_faithfulness_0_1": 1.0,
+    "avg_total_time_s": 230.44323014999918,
+    "avg_total_tokens": 1290.0
+  },
+  "source_metrics_csv": "C:\\Users\\Admin\\Desktop\\RL-RAG\\results\\baseline_5_metrics.csv"
+}

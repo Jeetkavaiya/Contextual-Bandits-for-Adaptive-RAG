@@ -1,132 +1,119 @@
 from __future__ import annotations
 
-import json
-import os
-import random
-from dataclasses import dataclass, asdict, field
-from typing import List, Optional, Tuple
+from dataclasses import dataclass
+from typing import List, Optional
 
-from .types import Chunk
-from .llm import OllamaLLM
+from .evalset import EvalItem
+from .judge import OllamaJudge, JudgeResult
+from .types import RAGResult
+
+
+def evidence_recall_at_k(retrieved_chunk_ids: List[str], gold_chunk_ids: List[str]) -> int:
+    """
+    1 if any gold support chunk id appears in retrieved context chunk ids, else 0.
+    """
+    if not gold_chunk_ids:
+        return 0
+    got = set(retrieved_chunk_ids)
+    return 1 if any(cid in got for cid in gold_chunk_ids) else 0
+
+
+def build_context_string_for_judge(res: RAGResult, max_chars: int = 6000) -> str:
+    """
+    Compact string of the final context that was passed to the answer LLM.
+    Used only for evaluation.
+    """
+    parts: List[str] = []
+    for c in res.context_chunks:
+        page = c.meta.get("page", None)
+        hdr = f"[{c.chunk_id}]"
+        if page is not None:
+            hdr += f" (page {page})"
+        parts.append(f"{hdr}\n{c.text}")
+    ctx = "\n\n".join(parts).strip()
+    return ctx[:max_chars]
 
 
 @dataclass
-class EvalItem:
+class MetricsRow:
     qid: str
-    raw_query: str
-    chat_history: List[Tuple[str, str]] = field(default_factory=list)
+    domain: str
 
-    gold_answer: Optional[str] = None
-    gold_support_chunk_ids: List[str] = field(default_factory=list)
+    correctness: Optional[int] = None      # 0/1/2
+    faithfulness: Optional[int] = None     # 0/1
+    judge_notes: str = ""
 
-    domain: str = "in_domain"  # in_domain / out_of_domain
+    evidence_recall_at_k: Optional[int] = None  # 0/1 (in-domain only)
 
+    total_time_s: float = 0.0
+    rewrite_s: float = 0.0
+    retrieve_s: float = 0.0
+    hybrid_s: float = 0.0
+    rerank_s: float = 0.0
+    build_prompt_s: float = 0.0
+    gen_s: float = 0.0
 
-def save_evalset_jsonl(items: List[EvalItem], path: str) -> None:
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        for it in items:
-            f.write(json.dumps(asdict(it), ensure_ascii=False))
-            f.write("\n")
+    prompt_tokens: Optional[int] = None
+    completion_tokens: Optional[int] = None
+    total_tokens: Optional[int] = None
+    context_tokens_est: Optional[int] = None
+    memory_tokens_est: Optional[int] = None
 
-
-def load_evalset_jsonl(path: str) -> List[EvalItem]:
-    items: List[EvalItem] = []
-    with open(path, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            obj = json.loads(line)
-            items.append(
-                EvalItem(
-                    qid=obj["qid"],
-                    raw_query=obj["raw_query"],
-                    chat_history=[tuple(x) for x in obj.get("chat_history", [])],
-                    gold_answer=obj.get("gold_answer", None),
-                    gold_support_chunk_ids=list(obj.get("gold_support_chunk_ids", [])),
-                    domain=obj.get("domain", "in_domain"),
-                )
-            )
-    return items
+    k_final: int = 0
+    nq: int = 0
+    rerank_enabled: int = 0
+    rewrite_enabled: int = 0
+    x_bm25: float = 0.0
+    y_dense: float = 0.0
 
 
-def default_out_of_domain_items() -> List[EvalItem]:
-    qs = [
-        ("ood_001", "What is the capital of India?"),
-        ("ood_002", "Solve: 37 * 19"),
-        ("ood_003", "What is the boiling point of water in Celsius at sea level?"),
-        ("ood_004", "Who wrote 'Pride and Prejudice'?"),
-        ("ood_005", "What is 15% of 260?"),
-        ("ood_006", "What is the capital of New York state?"),
-        ("ood_007", "Simplify: (x^2 * x^3)"),
-        ("ood_008", "What is the largest planet in our solar system?"),
-        ("ood_009", "Convert 5 kilometers to meters."),
-        ("ood_010", "What year did World War II end?"),
-    ]
-    items = []
-    for qid, q in qs:
-        items.append(EvalItem(qid=qid, raw_query=q, domain="out_of_domain"))
-    return items
-
-
-def generate_in_domain_items_from_chunks(
-    chunks: List[Chunk],
-    n: int,
-    seed: int = 7,
-    model: Optional[str] = None,
-) -> List[EvalItem]:
+def score_one(item: EvalItem, res: RAGResult, judge: Optional[OllamaJudge] = None) -> MetricsRow:
     """
-    Generates (question, short gold answer) pairs from randomly sampled chunks.
-    Each item gets gold_support_chunk_ids = [the source chunk_id] (simple but strong for Recall@k).
-
-    This runs locally using Ollama (no APIs).
+    Turns one RAGResult into one metrics row using Ollama judge.
     """
-    rng = random.Random(seed)
-    llm = OllamaLLM(model=model)
+    judge = judge or OllamaJudge()
 
-    sampled = rng.sample(chunks, k=min(n, len(chunks)))
-    items: List[EvalItem] = []
+    retrieved_ids = [c.chunk_id for c in res.context_chunks]
+    ctx = build_context_string_for_judge(res)
 
-    for i, ch in enumerate(sampled):
-        prompt = f"""Create one question and a short answer based ONLY on the text below.
+    jr: JudgeResult = judge.score(
+        question=item.raw_query,
+        predicted_answer=res.answer,
+        context=ctx,
+        gold_answer=item.gold_answer,
+    )
 
-Text:
-{ch.text}
+    cfg = res.meta.get("config", {}) if isinstance(res.meta, dict) else {}
 
-Rules:
-- The question must be answerable from the text.
-- The answer must be short (1-2 sentences or a small list).
-- Output STRICT JSON only:
-{{
-  "question": "...",
-  "answer": "..."
-}}
-"""
-        raw, _, _ = llm.generate(prompt, temperature=0.2, top_p=0.9, top_k=40, num_predict=200)
+    row = MetricsRow(
+        qid=item.qid,
+        domain=item.domain,
+        correctness=jr.correctness,
+        faithfulness=jr.faithfulness,
+        judge_notes=jr.notes,
+        evidence_recall_at_k=evidence_recall_at_k(retrieved_ids, item.gold_support_chunk_ids),
+        total_time_s=float(res.timings.total_s),
+        rewrite_s=float(res.timings.rewrite_s),
+        retrieve_s=float(res.timings.retrieve_s),
+        hybrid_s=float(res.timings.hybrid_s),
+        rerank_s=float(res.timings.rerank_s),
+        build_prompt_s=float(res.timings.build_prompt_s),
+        gen_s=float(res.timings.gen_s),
+        prompt_tokens=res.tokens.prompt_tokens,
+        completion_tokens=res.tokens.completion_tokens,
+        total_tokens=res.tokens.total_tokens,
+        context_tokens_est=res.tokens.context_tokens,
+        memory_tokens_est=res.tokens.memory_tokens,
+        k_final=int(cfg.get("k_final", 0) or 0),
+        nq=int(cfg.get("nq", 0) or 0),
+        rerank_enabled=1 if cfg.get("rerank", False) else 0,
+        rewrite_enabled=1 if cfg.get("rewrite", False) else 0,
+        x_bm25=float(cfg.get("x_bm25", 0.0) or 0.0),
+        y_dense=float(cfg.get("y_dense", 0.0) or 0.0),
+    )
 
-        # parse JSON
-        q = None
-        a = None
-        try:
-            obj = json.loads(raw.strip())
-            q = str(obj.get("question", "")).strip()
-            a = str(obj.get("answer", "")).strip()
-        except Exception:
-            # fallback: if parse fails, skip
-            continue
+    # out-of-domain: recall doesn't apply
+    if item.domain == "out_of_domain":
+        row.evidence_recall_at_k = None
 
-        if not q or not a:
-            continue
-
-        items.append(
-            EvalItem(
-                qid=f"id_{i:03d}",
-                raw_query=q,
-                gold_answer=a,
-                gold_support_chunk_ids=[ch.chunk_id],
-                domain="in_domain",
-            )
-        )
-
-    return items
+    return row
