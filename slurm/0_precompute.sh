@@ -19,7 +19,6 @@
 #SBATCH --time=04:00:00          # 4 hours per item-slice (60 actions × ~30s each)
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=4
-#SBATCH --gres=gpu:1             # GPU for faster cross-encoder reranking + Ollama
 #SBATCH --partition=general-compute
 #SBATCH --qos=general-compute
 #SBATCH --account=introccr
@@ -52,9 +51,17 @@ module load cuda/11.8.0
 # ── 2. Activate conda env ─────────────────────────────────────────────────────
 source $HOME/envs/rl_rag/bin/activate
 
+# ── Auto-detect GPU, fall back to CPU ────────────────────────────────────────
+if nvidia-smi > /dev/null 2>&1; then
+    echo "GPU detected: $(nvidia-smi --query-gpu=name --format=csv,noheader)"
+    export OLLAMA_GPU=1
+else
+    echo "No GPU - running on CPU (slower but functional)"
+    export CUDA_VISIBLE_DEVICES=""
+fi
+
 # ── 3. Start Ollama server in background ──────────────────────────────────────
-# Ollama binary should already be in PATH or set OLLAMA_BIN
-OLLAMA_BIN="${OLLAMA_MODELS}/../ollama"
+OLLAMA_BIN="$HOME/ollama_install/bin/ollama"
 if [ ! -f "$OLLAMA_BIN" ]; then
     OLLAMA_BIN=$(which ollama 2>/dev/null || echo "")
 fi
