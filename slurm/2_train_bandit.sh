@@ -44,7 +44,7 @@ mkdir -p logs checkpoints results
 
 module purge
 module load gcc/11.2.0
-module load python/3.11.3
+module load python/3.9.6
 
 source /projects/academic/YOUR_GROUP/envs/rl_rag/bin/activate  # <-- change
 

@@ -44,8 +44,8 @@ mkdir -p logs results/rewards
 # ── 1. Load modules ───────────────────────────────────────────────────────────
 module purge
 module load gcc/11.2.0
-module load python/3.11.3           # or: module load anaconda3/2023.09-0
-module load cuda/12.1               # needed for torch / FAISS
+module load python/3.9.6
+module load cuda/11.8.0
 
 # ── 2. Activate conda env ─────────────────────────────────────────────────────
 # If using conda:
