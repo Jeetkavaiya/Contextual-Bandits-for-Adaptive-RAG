@@ -20,8 +20,8 @@
 #SBATCH --mem=16G
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=general-compute
-# Remove the GPU line — not needed for bandit training:
-# #SBATCH --gres=gpu:1
+#SBATCH --qos=general-compute
+#SBATCH --account=introccr
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Hyperparameter sweep (array job mode)

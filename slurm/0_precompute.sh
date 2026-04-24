@@ -21,6 +21,8 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --gres=gpu:1             # GPU for faster cross-encoder reranking + Ollama
 #SBATCH --partition=general-compute
+#SBATCH --qos=general-compute
+#SBATCH --account=introccr
 #SBATCH --array=0-9              # 10 tasks × 10 items each = 100 items total
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=devchira@buffalo.edu

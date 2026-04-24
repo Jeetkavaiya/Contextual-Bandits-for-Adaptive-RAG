@@ -14,6 +14,8 @@
 #SBATCH --mem=8G
 #SBATCH --cpus-per-task=1
 #SBATCH --partition=general-compute
+#SBATCH --qos=general-compute
+#SBATCH --account=introccr
 
 set -euo pipefail
 mkdir -p logs
