@@ -35,7 +35,7 @@ OLLAMA_MODEL="llama3.2:3b"
 EMBED_MODEL="nomic-embed-text"
 
 # Where Ollama stores downloaded models (must be pre-pulled on CCR shared FS)
-export OLLAMA_MODELS="/projects/academic/YOUR_GROUP/ollama_models"  # <-- change
+export OLLAMA_MODELS="$HOME/ollama_models"
 # ──────────────────────────────────────────────────────────────────────────────
 
 set -euo pipefail
@@ -48,10 +48,7 @@ module load python/3.9.6
 module load cuda/11.8.0
 
 # ── 2. Activate conda env ─────────────────────────────────────────────────────
-# If using conda:
-# source activate rl_rag
-# If using venv:
-source /projects/academic/YOUR_GROUP/envs/rl_rag/bin/activate  # <-- change
+source $HOME/envs/rl_rag/bin/activate
 
 # ── 3. Start Ollama server in background ──────────────────────────────────────
 # Ollama binary should already be in PATH or set OLLAMA_BIN
@@ -86,7 +83,7 @@ END=$(( START + CHUNK_SIZE ))
 
 echo "Task ${SLURM_ARRAY_TASK_ID}: items [${START}, ${END})"
 
-cd /projects/academic/YOUR_GROUP/RL/final-project-team_4  # <-- change REPO ROOT
+cd $HOME/final-project-team_4
 
 python precompute_rewards.py compute \
     --evalset     "$EVALSET" \

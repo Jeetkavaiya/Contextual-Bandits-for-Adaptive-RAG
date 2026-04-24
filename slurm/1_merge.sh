@@ -22,9 +22,9 @@ module purge
 module load gcc/11.2.0
 module load python/3.9.6
 
-source /projects/academic/YOUR_GROUP/envs/rl_rag/bin/activate  # <-- change
+source $HOME/envs/rl_rag/bin/activate
 
-cd /projects/academic/YOUR_GROUP/RL/final-project-team_4  # <-- change
+cd $HOME/final-project-team_4
 
 python precompute_rewards.py merge \
     --out_dir   results/rewards \
