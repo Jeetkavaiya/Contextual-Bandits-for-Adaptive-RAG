@@ -73,7 +73,7 @@ def build_pipeline(
     llm_model: Optional[str] = None,
 ) -> RAGPipeline:
     print(f"[setup] Loading chunks from {pdf_path} …", flush=True)
-    chunks = load_or_build_chunks(
+    chunks, _ = load_or_build_chunks(
         pdf_path=pdf_path,
         chunk_size=450,
         overlap=80,
@@ -188,7 +188,8 @@ def run_precompute(args: argparse.Namespace) -> None:
         embed_model=args.embed_model,
         llm_model=args.llm_model,
     )
-    judge = OllamaJudge(base_url=args.ollama_host)
+    os.environ["OLLAMA_BASE_URL"] = args.ollama_host
+    judge = OllamaJudge()
     actions = build_action_space()
     base_cfg = RAGConfig()
 
