@@ -15,7 +15,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --partition=general-compute
 #SBATCH --qos=general-compute
-#SBATCH --account=introccr
+#SBATCH --account=ccr
 
 set -euo pipefail
 mkdir -p logs

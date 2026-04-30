@@ -21,7 +21,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=general-compute
 #SBATCH --qos=general-compute
-#SBATCH --account=introccr
+#SBATCH --account=ccr
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Hyperparameter sweep (array job mode)
