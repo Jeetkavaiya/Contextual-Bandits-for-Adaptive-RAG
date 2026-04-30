@@ -1,0 +1,42 @@
+[
+  {
+    "algo": "epsilon_greedy",
+    "n_episodes": 5000,
+    "mean_reward": 1.1585097207270796,
+    "std_reward": 0.5170535893602068,
+    "mean_reward_last10p": 1.1814341723024846,
+    "final_cum_regret": 1936.9039225763408,
+    "mean_regret": 0.3873807845152682,
+    "arms_explored_frac": 1.0
+  },
+  {
+    "algo": "ucb1",
+    "n_episodes": 5000,
+    "mean_reward": 1.0629423768661916,
+    "std_reward": 0.5313500151577449,
+    "mean_reward_last10p": 1.1496701477020979,
+    "final_cum_regret": 2395.460728932172,
+    "mean_regret": 0.4790921457864344,
+    "arms_explored_frac": 1.0
+  },
+  {
+    "algo": "linucb",
+    "n_episodes": 5000,
+    "mean_reward": 1.1977937961012124,
+    "std_reward": 0.41726233776434735,
+    "mean_reward_last10p": 1.1957659640610219,
+    "final_cum_regret": 1729.988694474101,
+    "mean_regret": 0.3459977388948202,
+    "arms_explored_frac": 0.1111111111111111
+  },
+  {
+    "algo": "thompson",
+    "n_episodes": 5000,
+    "mean_reward": 1.2327915410324932,
+    "std_reward": 0.3017936261964121,
+    "mean_reward_last10p": 1.2681604479551316,
+    "final_cum_regret": 1530.5834936872125,
+    "mean_regret": 0.3061166987374425,
+    "arms_explored_frac": 1.0
+  }
+]
