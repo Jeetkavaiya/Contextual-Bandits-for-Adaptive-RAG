@@ -4,6 +4,10 @@
 
 **Members:** Jeet Kavaiya · Dev Desai · Vansh Thakkar
 
+**GitHub repository:** https://github.com/ub-cse546-s26/final-project-team_4
+
+**GitHub Project board (Kanban, To Do / In Progress / Done):** https://github.com/orgs/ub-cse546-s26/projects/21/views/1
+
 ## What to grade
 
 | Item | Path |
@@ -19,6 +23,7 @@
 | SLURM scripts used on UB CCR | `slurm/` |
 | Earlier checkpoint notebook (baseline pipeline trace) | `notebooks/final_project_checkpoint_jeetkava_devchira_vanshpra_FIXED.ipynb` |
 | Project README with setup, structure, and results | `README.md` |
+| GitHub Project board (Kanban) screenshots | `screenshots/` |
 
 ## Headline result
 

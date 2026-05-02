@@ -188,8 +188,7 @@ ollama pull llama3.2:3b
 ollama pull nomic-embed-text
 kill %1
 
-sed -i 's|--account=introccr|--account=YOUR_ACCOUNT|g' slurm/*.sh
-sed -i 's|--qos=general-compute|--qos=YOUR_QOS|g' slurm/*.sh
+# If needed, edit --account/--qos directly inside slurm/*.sh for your CCR allocation.
 ```
 
 ### Submit Training Jobs
