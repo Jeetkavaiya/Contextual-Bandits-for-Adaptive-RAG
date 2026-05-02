@@ -1,6 +1,5 @@
 \documentclass{article}
 
-% Default style: NeurIPS 2023. Drop neurips_2023.sty next to this .tex.
 \usepackage[final]{neurips_2023}
 
 \usepackage[utf8]{inputenc}
@@ -95,7 +94,6 @@ The baseline is a fixed advanced RAG stack (Figure~\ref{fig:baseline}). It alway
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.85\linewidth]{baseline_rag.png}
-    % If not yet rendered: render report/diagrams/baseline_rag.mmd to PNG and place in report/diagrams/.
     \caption{Fixed baseline RAG pipeline. Every query runs through every step.}
     \label{fig:baseline}
 \end{figure}
@@ -175,7 +173,6 @@ Running the full pipeline plus judge takes seconds to tens of seconds per call. 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.62\linewidth]{training_pipeline.png}
-    % If not yet rendered: render report/diagrams/training_pipeline.mmd to PNG and place in report/diagrams/.
     \caption{Two phase training. Phase 1 produces a precomputed reward table on GPU. Phase 2 trains the bandits on the table with pure NumPy on CPU.}
     \label{fig:training}
 \end{figure}
@@ -191,7 +188,6 @@ At test time we plug the trained policy into the pipeline (Figure~\ref{fig:rlrag
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.95\linewidth]{rl_rag.png}
-    % If not yet rendered: render report/diagrams/rl_rag.mmd to PNG and place in report/diagrams/.
     \caption{RL+RAG inference. Trained Thompson policy picks one of 54 configs per query.}
     \label{fig:rlrag}
 \end{figure}
@@ -406,19 +402,12 @@ Vansh Thakkar & Evalset construction, reward design, evaluation, results analysi
 \end{table}
 
 %-----------------------------------------------------------
-\section*{Reproducibility}
+\section*{Repository and Artifacts}
 %-----------------------------------------------------------
 
-Repository: \url{https://github.com/ub-cse546-s26/final-project-team_4}. Project board (with weekly task tracking across To Do, In Progress, Done): \url{https://github.com/orgs/ub-cse546-s26/projects/21/views/1}. Commit: \texttt{e981d5a}. To reproduce the head to head: install \texttt{requirements\_ccr.txt}, start Ollama with \texttt{llama3.2:3b} and \texttt{nomic-embed-text}, then run
-
-\begin{verbatim}
-python run_compare.py \
-    --evalset data/evalset_100_gold.jsonl \
-    --bandit thompson \
-    --out_dir results/compare_fair
-\end{verbatim}
-
-Artifacts will be written to \texttt{results/compare\_fair/} and the comparison summary to \texttt{summary\_thompson.json}.
+Repository: \url{https://github.com/ub-cse546-s26/final-project-team_4}.  
+Project board: \url{https://github.com/orgs/ub-cse546-s26/projects/21/views/1}.  
+Main comparison artifacts are stored in \texttt{results/compare\_fair/} and include baseline and RL metrics, per query details, and summary files.
 
 %-----------------------------------------------------------
 \bibliographystyle{plainnat}
