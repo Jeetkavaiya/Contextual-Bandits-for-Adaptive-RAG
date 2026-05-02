@@ -1,0 +1,35 @@
+%% RL+RAG inference pipeline (trained policy)
+%% Matches run_compare.py / env/state_features.py / env/action_space.py
+flowchart LR
+    Q["Raw Query<br/>+ chat history"] --> SF["State Extractor<br/>11 features"]
+
+    subgraph SFD["State Features"]
+        L1["len_words, len_chars"]
+        L2["has_list, has_steps,<br/>has_compare, has_why, has_math"]
+        L3["bm25_top, bm25_gap"]
+        L4["dense_top, dense_gap"]
+    end
+
+    SF -.computes.-> SFD
+    SFD --> S["State vector s in R^11"]
+
+    S --> SC["StateScaler<br/>(mean, std from training)"]
+    SC --> POL["Trained Policy<br/>Thompson Sampling<br/>(checkpoints/task_0/thompson.pkl)"]
+
+    POL --> ACT["Action a in {0..53}<br/>(rewrite, nq, rerank, k_final, x_bm25)"]
+    ACT --> CFG["RAGConfig per query"]
+
+    CFG --> PIPE["RAG Pipeline<br/>(rag/pipeline.py)<br/>config selected per query"]
+    Q --> PIPE
+    PIPE --> A["Final Answer"]
+
+    PIPE --> JUDGE["LLM Judge<br/>(Ollama)"]
+    JUDGE --> M["Metrics<br/>correctness, faithfulness,<br/>recall, latency, tokens"]
+    M --> R["Scalar reward<br/>(quality minus cost)"]
+
+    classDef step fill:#eaf3ff,stroke:#3b6db5,stroke-width:1px,color:#0d2b59;
+    classDef io fill:#fff3cd,stroke:#b58a00,stroke-width:1px,color:#5a3e00;
+    classDef rl fill:#f3e8ff,stroke:#7c3aed,stroke-width:1.2px,color:#3a1d75;
+    class Q,A,M,R io;
+    class SF,SFD,L1,L2,L3,L4,S,SC,PIPE,JUDGE step;
+    class POL,ACT,CFG rl;

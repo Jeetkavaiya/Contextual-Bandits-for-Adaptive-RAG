@@ -1,0 +1,26 @@
+%% Fixed baseline RAG pipeline
+%% Matches rag/pipeline.py with RAGConfig defaults:
+%% rewrite=True, nq=3, rerank=True, k_final=10, x_bm25=0.5
+flowchart LR
+    Q["Raw Query<br/>+ chat history"] --> RW["Query Rewriter<br/>(Ollama llama3.2:3b)"]
+    RW --> MQ["Multi-Query Expansion<br/>nq = 3"]
+
+    MQ --> BM["BM25 Index<br/>(rank-bm25)<br/>top 50 / query"]
+    MQ --> DE["Dense Index<br/>(FAISS + nomic-embed-text)<br/>top 50 / query"]
+
+    BM --> HY["Hybrid Fusion<br/>0.5 BM25_norm + 0.5 Dense_norm"]
+    DE --> HY
+
+    HY --> RR["Cross-Encoder Reranker<br/>BAAI/bge-reranker-base<br/>top 30 to top 10"]
+    RR --> CTX["Final Context<br/>k_final = 10 chunks"]
+
+    Q --> P["Build Prompt<br/>raw query + memory + 10 chunks"]
+    CTX --> P
+
+    P --> LLM["Answer LLM<br/>(Ollama llama3.2:3b)"]
+    LLM --> A["Final Answer"]
+
+    classDef step fill:#eaf3ff,stroke:#3b6db5,stroke-width:1px,color:#0d2b59;
+    classDef io fill:#fff3cd,stroke:#b58a00,stroke-width:1px,color:#5a3e00;
+    class Q,A io;
+    class RW,MQ,BM,DE,HY,RR,CTX,P,LLM step;
