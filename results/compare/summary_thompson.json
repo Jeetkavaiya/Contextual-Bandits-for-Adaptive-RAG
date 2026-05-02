@@ -1,0 +1,52 @@
+{
+  "n_queries": 10,
+  "qids": [
+    "in_010",
+    "in_065",
+    "in_062",
+    "ood_001",
+    "ood_002",
+    "in_002",
+    "in_046",
+    "in_006",
+    "ood_005",
+    "ood_003"
+  ],
+  "bandit": "thompson",
+  "baseline_all": {
+    "correctness": 1.7,
+    "faithfulness": 0.9,
+    "evidence_recall_at_k": 0.16666666666666666,
+    "total_time_s": 110.96515655999956,
+    "total_tokens": 1169.9,
+    "k_final": 10.0,
+    "reward": -4.370597627999978
+  },
+  "rl_all": {
+    "correctness": 1.6,
+    "faithfulness": 0.8,
+    "evidence_recall_at_k": 0.16666666666666666,
+    "total_time_s": 6.525186189997475,
+    "total_tokens": 1229.6,
+    "k_final": 11.5,
+    "reward": 0.7732814905001261
+  },
+  "baseline_in_domain": {
+    "correctness": 1.8333333333333333,
+    "faithfulness": 1.0,
+    "evidence_recall_at_k": 0.16666666666666666,
+    "total_time_s": 105.93921438332897,
+    "total_tokens": 1122.8333333333333,
+    "k_final": 10.0,
+    "reward": -3.9692063858331146
+  },
+  "rl_in_domain": {
+    "correctness": 1.3333333333333333,
+    "faithfulness": 0.6666666666666666,
+    "evidence_recall_at_k": 0.16666666666666666,
+    "total_time_s": 8.329749449990535,
+    "total_tokens": 1579.0,
+    "k_final": 15.0,
+    "reward": 0.4820211941671399
+  }
+}
